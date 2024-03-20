@@ -7,15 +7,16 @@
 #include <type_traits>
 #include <vector>
 
-#include <clp/components/core/src/ffi/encoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ir/types.hpp>
 
 #include <ffi_go/defs.h>
 #include <ffi_go/ir/LogTypes.hpp>
 #include <ffi_go/LogTypes.hpp>
 
 namespace ffi_go::ir {
-using namespace ffi::ir_stream;
+using namespace clp::ffi::ir_stream;
 
 namespace {
     /**
@@ -32,8 +33,8 @@ namespace {
     ) -> int {
         typedef typename std::conditional<
                 std::is_same_v<Int64tSpan, encoded_var_view_t>,
-                ffi::eight_byte_encoded_variable_t,
-                ffi::four_byte_encoded_variable_t>::type encoded_var_t;
+                clp::ir::eight_byte_encoded_variable_t,
+                clp::ir::four_byte_encoded_variable_t>::type encoded_var_t;
         Encoder<encoded_var_t>* encoder{static_cast<Encoder<encoded_var_t>*>(ir_encoder)};
         LogMessage<encoded_var_t>& ir_log_msg = encoder->m_log_message;
         ir_log_msg.reserve(log_message.m_size);
@@ -41,7 +42,7 @@ namespace {
         std::string_view const log_msg_view{log_message.m_data, log_message.m_size};
         std::vector<int32_t> dict_var_offsets;
         if (false
-            == ffi::encode_message<encoded_var_t>(
+            == clp::ffi::encode_message<encoded_var_t>(
                     log_msg_view,
                     ir_log_msg.m_logtype,
                     ir_log_msg.m_vars,
@@ -79,21 +80,21 @@ namespace {
 }  // namespace
 
 extern "C" auto ir_encoder_eight_byte_new() -> void* {
-    return new Encoder<ffi::eight_byte_encoded_variable_t>{};
+    return new Encoder<clp::ir::eight_byte_encoded_variable_t>{};
 }
 
 extern "C" auto ir_encoder_four_byte_new() -> void* {
-    return new Encoder<ffi::four_byte_encoded_variable_t>{};
+    return new Encoder<clp::ir::four_byte_encoded_variable_t>{};
 }
 
 extern "C" auto ir_encoder_eight_byte_close(void* ir_encoder) -> void {
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    delete static_cast<Encoder<ffi::eight_byte_encoded_variable_t>*>(ir_encoder);
+    delete static_cast<Encoder<clp::ir::eight_byte_encoded_variable_t>*>(ir_encoder);
 }
 
 extern "C" auto ir_encoder_four_byte_close(void* ir_encoder) -> void {
     // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-    delete static_cast<Encoder<ffi::four_byte_encoded_variable_t>*>(ir_encoder);
+    delete static_cast<Encoder<clp::ir::four_byte_encoded_variable_t>*>(ir_encoder);
 }
 
 extern "C" auto ir_encoder_encode_eight_byte_log_message(

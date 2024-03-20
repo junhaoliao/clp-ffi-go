@@ -10,11 +10,12 @@
 #include <string_view>
 #include <type_traits>
 
-#include <clp/components/core/src/BufferReader.hpp>
-#include <clp/components/core/src/ErrorCode.hpp>
-#include <clp/components/core/src/ffi/encoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/decoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/encoding_methods.hpp>
+#include <clp/components/core/src/clp/BufferReader.hpp>
+#include <clp/components/core/src/clp/ErrorCode.hpp>
+#include <clp/components/core/src/clp/ffi/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/encoding_methods.hpp>
+#include <clp/components/core/src/clp/string_utils/string_utils.hpp>
 
 #include <ffi_go/defs.h>
 #include <ffi_go/ir/LogTypes.hpp>
@@ -22,8 +23,11 @@
 #include <ffi_go/search/wildcard_query.h>
 
 namespace ffi_go::ir {
-using namespace ffi;
-using namespace ffi::ir_stream;
+using namespace clp::ffi;
+using namespace clp::ffi::ir_stream;
+using clp::ir::eight_byte_encoded_variable_t;
+using clp::ir::four_byte_encoded_variable_t;
+using clp::string_utils::wildcard_match_unsafe;
 
 namespace {
     /**
@@ -58,20 +62,20 @@ namespace {
             size_t* ir_pos,
             LogEventView* log_event
     ) -> int {
-        BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
+        clp::BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
         Deserializer* deserializer{static_cast<Deserializer*>(ir_deserializer)};
 
         IRErrorCode err{};
         epoch_time_ms_t timestamp{};
         if constexpr (std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>) {
-            err = eight_byte_encoding::decode_next_message(
+            err = eight_byte_encoding::deserialize_log_event(
                     ir_buf,
                     deserializer->m_log_event.m_log_message,
                     timestamp
             );
         } else if constexpr (std::is_same_v<encoded_variable_t, four_byte_encoded_variable_t>) {
             epoch_time_ms_t timestamp_delta{};
-            err = four_byte_encoding::decode_next_message(
+            err = four_byte_encoding::deserialize_log_event(
                     ir_buf,
                     deserializer->m_log_event.m_log_message,
                     timestamp_delta
@@ -86,7 +90,7 @@ namespace {
         deserializer->m_timestamp = timestamp;
 
         size_t pos{0};
-        if (ErrorCode_Success != ir_buf.try_get_pos(pos)) {
+        if (clp::ErrorCode_Success != ir_buf.try_get_pos(pos)) {
             return static_cast<int>(IRErrorCode_Decode_Error);
         }
         *ir_pos = pos;
@@ -106,7 +110,7 @@ namespace {
             LogEventView* log_event,
             size_t* matching_query
     ) -> int {
-        BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
+        clp::BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
         Deserializer* deserializer{static_cast<Deserializer*>(ir_deserializer)};
         std::string_view const query_view{
                 merged_query.m_queries.m_data,
@@ -148,14 +152,14 @@ namespace {
         while (true) {
             epoch_time_ms_t timestamp{};
             if constexpr (std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>) {
-                err = eight_byte_encoding::decode_next_message(
+                err = eight_byte_encoding::deserialize_log_event(
                         ir_buf,
                         deserializer->m_log_event.m_log_message,
                         timestamp
                 );
             } else if constexpr (std::is_same_v<encoded_variable_t, four_byte_encoded_variable_t>) {
                 epoch_time_ms_t timestamp_delta{};
-                err = four_byte_encoding::decode_next_message(
+                err = four_byte_encoding::deserialize_log_event(
                         ir_buf,
                         deserializer->m_log_event.m_log_message,
                         timestamp_delta
@@ -181,7 +185,7 @@ namespace {
             std::pair<bool, size_t> const match{query_fn(deserializer->m_log_event.m_log_message)};
             if (match.first) {
                 size_t pos{0};
-                if (ErrorCode_Success != ir_buf.try_get_pos(pos)) {
+                if (clp::ErrorCode_Success != ir_buf.try_get_pos(pos)) {
                     return static_cast<int>(IRErrorCode_Decode_Error);
                 }
                 *ir_pos = pos;
@@ -210,7 +214,7 @@ extern "C" auto ir_deserializer_deserialize_preamble(
         void** ir_deserializer_ptr,
         void** timestamp_ptr
 ) -> int {
-    BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
+    clp::BufferReader ir_buf{static_cast<char const*>(ir_view.m_data), ir_view.m_size};
 
     bool four_byte_encoding{};
     if (IRErrorCode const err{get_encoding_type(ir_buf, four_byte_encoding)};
@@ -221,14 +225,14 @@ extern "C" auto ir_deserializer_deserialize_preamble(
     *ir_encoding = four_byte_encoding ? 1 : 0;
 
     if (IRErrorCode const err{
-                decode_preamble(ir_buf, *metadata_type, *metadata_pos, *metadata_size)};
+                deserialize_preamble(ir_buf, *metadata_type, *metadata_pos, *metadata_size)};
         IRErrorCode_Success != err)
     {
         return static_cast<int>(err);
     }
 
     size_t pos{0};
-    if (ErrorCode_Success != ir_buf.try_get_pos(pos)) {
+    if (clp::ErrorCode_Success != ir_buf.try_get_pos(pos)) {
         return static_cast<int>(IRErrorCode_Decode_Error);
     }
     *ir_pos = pos;

@@ -4,8 +4,9 @@
 #include <string>
 #include <vector>
 
-#include <clp/components/core/src/Defs.h>
-#include <clp/components/core/src/ffi/encoding_methods.hpp>
+#include <clp/components/core/src/clp/Defs.h>
+#include <clp/components/core/src/clp/ffi/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ir/types.hpp>
 
 #include <ffi_go/LogTypes.hpp>
 
@@ -50,7 +51,7 @@ struct Encoder {
  */
 struct Deserializer {
     ffi_go::LogEvent m_log_event;
-    ffi::epoch_time_ms_t m_timestamp{};
+    clp::ir::epoch_time_ms_t m_timestamp{};
 };
 
 /**

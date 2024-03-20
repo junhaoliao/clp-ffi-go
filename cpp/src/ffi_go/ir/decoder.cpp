@@ -6,15 +6,15 @@
 #include <string_view>
 #include <vector>
 
-#include <clp/components/core/src/ffi/encoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ir/types.hpp>
 
 #include <ffi_go/defs.h>
 #include <ffi_go/ir/LogTypes.hpp>
 #include <ffi_go/LogTypes.hpp>
 
 namespace ffi_go::ir {
-using namespace ffi::ir_stream;
+using namespace clp::ffi::ir_stream;
 
 namespace {
     /**
@@ -31,15 +31,15 @@ namespace {
     ) -> int {
         typedef typename std::conditional<
                 std::is_same_v<Int64tSpan, encoded_var_view_t>,
-                ffi::eight_byte_encoded_variable_t,
-                ffi::four_byte_encoded_variable_t>::type encoded_var_t;
+                clp::ir::eight_byte_encoded_variable_t,
+                clp::ir::four_byte_encoded_variable_t>::type encoded_var_t;
         Decoder* decoder{static_cast<Decoder*>(ir_decoder)};
         ffi_go::LogMessage& log_msg = decoder->m_log_message;
         log_msg.reserve(logtype.m_size + dict_vars.m_size);
 
         IRErrorCode err{IRErrorCode_Success};
         try {
-            log_msg = ffi::decode_message<encoded_var_t>(
+            log_msg = clp::ffi::decode_message<encoded_var_t>(
                     std::string_view(logtype.m_data, logtype.m_size),
                     vars.m_data,
                     vars.m_size,
@@ -47,7 +47,7 @@ namespace {
                     dict_var_end_offsets.m_data,
                     dict_var_end_offsets.m_size
             );
-        } catch (ffi::EncodingException& e) {
+        } catch (clp::ffi::EncodingException& e) {
             err = IRErrorCode_Decode_Error;
         }
 

@@ -6,17 +6,19 @@
 #include <string_view>
 #include <vector>
 
-#include <clp/components/core/src/ffi/encoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/decoding_methods.hpp>
-#include <clp/components/core/src/ffi/ir_stream/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/decoding_methods.hpp>
+#include <clp/components/core/src/clp/ffi/ir_stream/encoding_methods.hpp>
+#include <clp/components/core/src/clp/ir/types.hpp>
 
 #include <ffi_go/defs.h>
 #include <ffi_go/ir/LogTypes.hpp>
 #include <ffi_go/LogTypes.hpp>
 
 namespace ffi_go::ir {
-using namespace ffi;
-using namespace ffi::ir_stream;
+using namespace clp::ffi::ir_stream;
+using clp::ir::eight_byte_encoded_variable_t;
+using clp::ir::four_byte_encoded_variable_t;
 
 namespace {
     /**
@@ -34,14 +36,14 @@ namespace {
 
         bool success{false};
         if constexpr (std::is_same_v<encoded_variable_t, eight_byte_encoded_variable_t>) {
-            success = eight_byte_encoding::encode_message(
+            success = eight_byte_encoding::serialize_log_event(
                     timestamp_or_delta,
                     std::string_view{log_message.m_data, log_message.m_size},
                     serializer->m_logtype,
                     serializer->m_ir_buf
             );
         } else if constexpr (std::is_same_v<encoded_variable_t, four_byte_encoded_variable_t>) {
-            success = four_byte_encoding::encode_message(
+            success = four_byte_encoding::serialize_log_event(
                     timestamp_or_delta,
                     std::string_view{log_message.m_data, log_message.m_size},
                     serializer->m_logtype,
@@ -75,7 +77,7 @@ extern "C" auto ir_serializer_serialize_eight_byte_preamble(
     Serializer* serializer{new Serializer{}};
     *ir_serializer_ptr = serializer;
     if (false
-        == eight_byte_encoding::encode_preamble(
+        == eight_byte_encoding::serialize_preamble(
                 std::string_view{ts_pattern.m_data, ts_pattern.m_size},
                 std::string_view{ts_pattern_syntax.m_data, ts_pattern_syntax.m_size},
                 std::string_view{time_zone_id.m_data, time_zone_id.m_size},
@@ -107,7 +109,7 @@ extern "C" auto ir_serializer_serialize_four_byte_preamble(
     }
     *ir_serializer_ptr = serializer;
     if (false
-        == four_byte_encoding::encode_preamble(
+        == four_byte_encoding::serialize_preamble(
                 std::string_view{ts_pattern.m_data, ts_pattern.m_size},
                 std::string_view{ts_pattern_syntax.m_data, ts_pattern_syntax.m_size},
                 std::string_view{time_zone_id.m_data, time_zone_id.m_size},

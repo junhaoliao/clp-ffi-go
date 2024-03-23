@@ -19,6 +19,7 @@ import "C"
 type (
 	EightByteEncoding = int64
 	FourByteEncoding  = int32
+	KVEncoding = int8
 )
 
 // TimestampInfo contains general information applying to all timestamps in

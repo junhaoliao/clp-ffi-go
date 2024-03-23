@@ -38,11 +38,24 @@ if (NOT EXISTS ${CLP_SRC_DIR})
     FetchContent_Declare(
         clp-core
         GIT_REPOSITORY https://github.com/LinZhihao-723/clp.git
-        GIT_TAG 93d220749d0fb438e1401cc0026a5dc6919b906d
+        GIT_TAG 68f3bcc7c55044d0804ecbcb6ca094cf5aa1cb9a
         SOURCE_DIR ${CLP_SRC_DIR}
     )
     message(STATUS "Fetching CLP from github.")
     FetchContent_MakeAvailable(clp-core)
+endif()
+
+set(MSGPACK_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/msgpack" CACHE STRING
+    "Directory containing msgpack source, fetched from github if non existant.")
+if (NOT EXISTS ${MSGPACK_SRC_DIR})
+    FetchContent_Declare(
+        msgpack-src
+        GIT_REPOSITORY https://github.com/msgpack/msgpack-c.git
+        GIT_TAG cpp-6.1.0
+        SOURCE_DIR ${MSGPACK_SRC_DIR}
+    )
+    message(STATUS "Fetching msgpack from github.")
+    FetchContent_MakeAvailable(msgpack-src)
 endif()
 
 add_library(${LIB_NAME})
@@ -78,7 +91,11 @@ target_include_directories(${LIB_NAME}
     ${CLP_SRC_DIR}/components/core/src/clp
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/msgpack/include
 )
+
+# Turn on verbose output
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 target_sources(${LIB_NAME} PUBLIC
     PUBLIC
@@ -116,6 +133,18 @@ target_sources(${LIB_NAME} PUBLIC
     ${CLP_SRC_DIR}/components/core/src/clp/ir/parsing.hpp
     ${CLP_SRC_DIR}/components/core/src/clp/ir/parsing.inc
     ${CLP_SRC_DIR}/components/core/src/clp/ir/types.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ErrorCode.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/byteswap.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/protocol_constants.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/serialization_methods.cpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/serialization_methods.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/SerializationBuffer.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/utils.cpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/ir_stream/utils.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/SchemaTree.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/ffi/SchemaTreeNode.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/TraceableException.hpp
+    ${CLP_SRC_DIR}/components/core/src/clp_s/Utils.hpp
     src/ffi_go/LogTypes.hpp
     src/ffi_go/ir/decoder.cpp
     src/ffi_go/ir/deserializer.cpp
@@ -124,6 +153,8 @@ target_sources(${LIB_NAME} PUBLIC
     src/ffi_go/ir/serializer.cpp
     src/ffi_go/search/wildcard_query.cpp
 )
+
+target_compile_definitions(${LIB_NAME} PRIVATE MSGPACK_NO_BOOST)
 
 include(GNUInstallDirs)
 install(TARGETS ${LIB_NAME}

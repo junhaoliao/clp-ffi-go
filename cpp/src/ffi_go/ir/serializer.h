@@ -17,6 +17,13 @@
 void ir_serializer_close(void* ir_serializer);
 
 /**
+ * Clean up the underlying ir::KVSerializer of a Go ir.Serializer.
+ * @param[in] ir_kv_serializer Address of a ir::KVSerializer created and
+ *     returned by ir_serializer_serialize_kv_preamble.
+ */
+void ir_kv_serializer_close(void* ir_kv_serializer);
+
+/**
  * Given the fields of a CLP IR premable, serialize them into an IR byte stream
  * with eight byte encoding. An ir::Serializer will be allocated to use as the
  * backing storage for a Go ir.Serializer (i.e. subsequent calls to
@@ -29,7 +36,7 @@ void ir_serializer_close(void* ir_serializer);
  * @param[in] time_zone_id TZID timezone of the timestamps in the IR
  * @param[out] ir_serializer_ptr Address of a new ir::Serializer
  * @param[out] ir_view View of a IR buffer containing the serialized preamble
- * @return ffi::ir_stream::IRErrorCode forwared from
+ * @return ffi::ir_stream::IRErrorCode forward from
  *     ffi::ir_stream::eight_byte_encoding::encode_preamble
  */
 int ir_serializer_serialize_eight_byte_preamble(
@@ -38,6 +45,17 @@ int ir_serializer_serialize_eight_byte_preamble(
         StringView time_zone_id,
         void** ir_serializer_ptr,
         ByteSpan* ir_view
+);
+
+/**
+ * TODO: complete the doc str.
+ * @param[out] ir_kv_serializer_ptr
+ * @param[out] ir_view
+ * @return ffi::ir_stream::IRErrorCode
+*/
+int ir_serializer_serialize_kv_preamble(
+    void** ir_kv_serializer_ptr,
+    ByteSpan* ir_view
 );
 
 /**
@@ -101,6 +119,19 @@ int ir_serializer_serialize_four_byte_log_event(
         StringView log_message,
         epoch_time_ms_t timestamp_delta,
         void* ir_serializer,
+        ByteSpan* ir_view
+);
+
+/**
+ * TODO: complete the doc str.
+ * @param[in] msgpack_bytes
+ * @param[in] ir_kv_serializer
+ * @param[out] ir_view
+ * @return ffi::ir_stream::IRErrorCode 
+*/
+int ir_serializer_serialize_kv_log_event(
+        ByteSpan msgpack_bytes,
+        void* ir_kv_serializer,
         ByteSpan* ir_view
 );
 

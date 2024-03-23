@@ -14,12 +14,14 @@ type EpochTimeMs int64
 type (
 	LogMessageView = string
 	LogMessage     = string
+	LogBinaryRecord = []byte
 )
 
 // LogEvent provides programmatic access to the various components of a log
 // event.
 type LogEvent struct {
 	LogMessage
+	BinaryRecord []byte
 	Timestamp EpochTimeMs
 }
 

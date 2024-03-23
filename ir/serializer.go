@@ -82,6 +82,16 @@ func FourByteSerializer(
 	return &irs, unsafe.Slice((*byte)(irView.m_data), irView.m_size), nil
 }
 
+// TODO: complete doc str.
+func KVSerializer() (Serializer, BufView, error) {
+	var irView C.ByteSpan
+	irs := kvSerializer{commonSerializer{TimestampInfo{"", "", ""}, nil}}
+	if err := IrError(C.ir_serializer_serialize_kv_preamble(&irs.cptr, &irView)); Success != err {
+		return nil, nil, err
+	}
+	return &irs, unsafe.Slice((*byte)(irView.m_data), irView.m_size), nil
+}
+
 // commonSerializer contains fields common to all types of CLP IR encoding.
 // TimestampInfo stores information common to all timestamps found in the IR.
 // cptr holds a reference to the underlying C++ objected used as backing storage
@@ -90,16 +100,6 @@ func FourByteSerializer(
 type commonSerializer struct {
 	tsInfo TimestampInfo
 	cptr   unsafe.Pointer
-}
-
-// Close will delete the underlying C++ allocated memory used by the
-// deserializer. Failure to call Close will result in a memory leak.
-func (self *commonSerializer) Close() error {
-	if nil != self.cptr {
-		C.ir_serializer_close(self.cptr)
-		self.cptr = nil
-	}
-	return nil
 }
 
 // Returns the TimestampInfo of the Serializer.
@@ -121,6 +121,16 @@ func (self *eightByteSerializer) SerializeLogEvent(
 	return serializeLogEvent(self, event)
 }
 
+// Close will delete the underlying C++ allocated memory used by the
+// deserializer. Failure to call Close will result in a memory leak.
+func (self *eightByteSerializer) Close() error {
+	if nil != self.cptr {
+		C.ir_serializer_close(self.cptr)
+		self.cptr = nil
+	}
+	return nil
+}
+
 // fourByteSerializer contains both a common CLP IR serializer and stores the
 // previously seen log event's timestamp. The previous timestamp is necessary to
 // calculate the current timestamp as four byte encoding only encodes the
@@ -138,6 +148,37 @@ func (self *fourByteSerializer) SerializeLogEvent(
 	event ffi.LogEvent,
 ) (BufView, error) {
 	return serializeLogEvent(self, event)
+}
+
+// Close will delete the underlying C++ allocated memory used by the
+// deserializer. Failure to call Close will result in a memory leak.
+func (self *fourByteSerializer) Close() error {
+	if nil != self.cptr {
+		C.ir_serializer_close(self.cptr)
+		self.cptr = nil
+	}
+	return nil
+}
+
+// TODO: add doc str.
+type kvSerializer struct {
+	commonSerializer
+}
+
+// TODO: add doc str.
+func (self *kvSerializer) SerializeLogEvent(
+	event ffi.LogEvent,
+) (BufView, error) {
+	return serializeLogEvent(self, event)
+}
+
+// TODO: add doc str.
+func (self *kvSerializer) Close() error {
+	if nil != self.cptr {
+		C.ir_kv_serializer_close(self.cptr)
+		self.cptr = nil
+	}
+	return nil
 }
 
 func serializeLogEvent(
@@ -164,6 +205,12 @@ func serializeLogEvent(
 		if Success == err {
 			irs.prevTimestamp = event.Timestamp
 		}
+	case *kvSerializer:
+		err = IrError(C.ir_serializer_serialize_kv_log_event(
+			newCByteSpan(event.BinaryRecord),
+			irs.cptr,
+			&irView,
+		))
 	}
 	if Success != err {
 		return nil, err

@@ -7,6 +7,7 @@
 #include <clp/components/core/src/clp/Defs.h>
 #include <clp/components/core/src/clp/ffi/encoding_methods.hpp>
 #include <clp/components/core/src/clp/ir/types.hpp>
+#include <clp/components/core/src/clp_s/ffi/ir_stream/SerializationBuffer.hpp>
 
 #include <ffi_go/LogTypes.hpp>
 
@@ -74,6 +75,14 @@ struct Serializer {
 
     std::string m_logtype;
     std::vector<int8_t> m_ir_buf;
+};
+
+/**
+ * The backing storage for Go ir.Serializer, using irV2 encoding for key value
+ * pair records.
+*/
+struct KVSerializer {
+    clp_s::ffi::ir_stream::SerializationBuffer m_serialization_buffer;
 };
 }  // namespace ffi_go::ir
 

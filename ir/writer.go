@@ -25,6 +25,10 @@ func NewWriter() (*Writer, error) {
 	return NewWriterSize[FourByteEncoding](1024*1024, time.Local.String())
 }
 
+func NewKVWriter() (*Writer, error) {
+	return NewWriterSize[KVEncoding](1024*1024, time.Local.String())
+}
+
 // NewWriterSize creates a new [Writer] with a [Serializer] based on T, and
 // writes a CLP IR preamble. The preamble is stored inside the Writer's internal
 // buffer to be written out later. The size parameter denotes the initial buffer
@@ -34,7 +38,7 @@ func NewWriter() (*Writer, error) {
 //   - success: valid [*Writer], nil
 //   - error: nil [*Writer], invalid type error or an error propagated from
 //     [FourByteSerializer], [EightByteSerializer], or [bytes.Buffer.Write]
-func NewWriterSize[T EightByteEncoding | FourByteEncoding](
+func NewWriterSize[T EightByteEncoding | FourByteEncoding | KVEncoding](
 	size int,
 	timeZoneId string,
 ) (*Writer, error) {
@@ -58,6 +62,8 @@ func NewWriterSize[T EightByteEncoding | FourByteEncoding](
 			timeZoneId,
 			ffi.EpochTimeMs(time.Now().UnixMilli()),
 		)
+	case KVEncoding:
+		irw.Serializer, irView, err = KVSerializer()
 	default:
 		err = fmt.Errorf("Invalid type: %T", t)
 	}

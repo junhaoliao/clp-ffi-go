@@ -25,8 +25,8 @@ func NewWriter() (*Writer, error) {
 	return NewWriterSize[FourByteEncoding](1024*1024, time.Local.String())
 }
 
-func NewKVWriter() (*Writer, error) {
-	return NewWriterSize[KVEncoding](1024*1024, time.Local.String())
+func NewKeyValuePairWriter() (*Writer, error) {
+	return NewWriterSize[KeyValuePairEncoding](1024*1024, time.Local.String())
 }
 
 // NewWriterSize creates a new [Writer] with a [Serializer] based on T, and
@@ -38,7 +38,7 @@ func NewKVWriter() (*Writer, error) {
 //   - success: valid [*Writer], nil
 //   - error: nil [*Writer], invalid type error or an error propagated from
 //     [FourByteSerializer], [EightByteSerializer], or [bytes.Buffer.Write]
-func NewWriterSize[T EightByteEncoding | FourByteEncoding | KVEncoding](
+func NewWriterSize[T EightByteEncoding | FourByteEncoding | KeyValuePairEncoding](
 	size int,
 	timeZoneId string,
 ) (*Writer, error) {
@@ -62,8 +62,8 @@ func NewWriterSize[T EightByteEncoding | FourByteEncoding | KVEncoding](
 			timeZoneId,
 			ffi.EpochTimeMs(time.Now().UnixMilli()),
 		)
-	case KVEncoding:
-		irw.Serializer, irView, err = KVSerializer()
+	case KeyValuePairEncoding:
+		irw.Serializer, irView, err = KeyValuePairSerializer()
 	default:
 		err = fmt.Errorf("Invalid type: %T", t)
 	}
@@ -109,13 +109,26 @@ func (self *Writer) Reset() {
 	self.buf.Reset()
 }
 
+// TODO: rewrite this.
 // Write uses [SerializeLogEvent] to serialize the provided log event to CLP IR
 // and then stores it in the internal buffer. Returns:
 //   - success: number of bytes written, nil
 //   - error: number of bytes written (can be 0), error propagated from
 //     [SerializeLogEvent] or [bytes.Buffer.Write]
-func (self *Writer) Write(event ffi.LogEvent) (int, error) {
-	irView, err := self.SerializeLogEvent(event)
+func (self *Writer) WriteUnstructured(event ffi.UnstructuredLogEvent) (int, error) {
+	irView, err := self.SerializeUnstructuredLogEvent(event)
+	if nil != err {
+		return 0, err
+	}
+	n, err := self.buf.Write(irView)
+	if nil != err {
+		return n, err
+	}
+	return n, nil
+}
+
+func (self *Writer) WriteStructured(event ffi.StructuredLogEvent) (int, error) {
+	irView, err := self.SerializeStructuredLogEvent(event)
 	if nil != err {
 		return 0, err
 	}

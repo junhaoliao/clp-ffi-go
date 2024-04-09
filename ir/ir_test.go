@@ -111,7 +111,7 @@ func assertIrLogEvent(
 	t *testing.T,
 	reader io.Reader,
 	irreader *Reader,
-	event ffi.LogEvent,
+	event ffi.UnstructuredLogEvent,
 ) {
 	log, err := irreader.Read()
 	if nil != err {

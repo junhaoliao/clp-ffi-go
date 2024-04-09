@@ -14,15 +14,20 @@ type EpochTimeMs int64
 type (
 	LogMessageView = string
 	LogMessage     = string
-	LogBinaryRecord = []byte
+	MsgpackRecord  = []byte
 )
 
-// LogEvent provides programmatic access to the various components of a log
-// event.
-type LogEvent struct {
+// UnstructuredLogEvent provides programmatic access to the various components
+// of a unstructured log event (message + timestamp).
+type UnstructuredLogEvent struct {
 	LogMessage
-	BinaryRecord []byte
 	Timestamp EpochTimeMs
+}
+
+// StructuredLogEvent provides programmatic access to the various components
+// of a structured log event (key value pairs, serialized into msgpack).
+type StructuredLogEvent struct {
+	MsgpackRecord
 }
 
 // The underlying memory of LogEventView is C-allocated and owned by the object

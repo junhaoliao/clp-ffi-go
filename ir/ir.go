@@ -17,9 +17,9 @@ import "C"
 
 // Must match c++ equivalent types
 type (
-	EightByteEncoding = int64
-	FourByteEncoding  = int32
-	KVEncoding = int8
+	EightByteEncoding    = int64
+	FourByteEncoding     = int32
+	KeyValuePairEncoding = int8
 )
 
 // TimestampInfo contains general information applying to all timestamps in

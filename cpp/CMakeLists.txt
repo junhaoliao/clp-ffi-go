@@ -37,8 +37,8 @@ set(CLP_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/clp" CACHE STRING
 if (NOT EXISTS ${CLP_SRC_DIR})
     FetchContent_Declare(
         clp-core
-        GIT_REPOSITORY https://github.com/LinZhihao-723/clp.git
-        GIT_TAG 68f3bcc7c55044d0804ecbcb6ca094cf5aa1cb9a
+        GIT_REPOSITORY https://github.com/y-scope/clp.git
+        GIT_TAG ir-v2
         SOURCE_DIR ${CLP_SRC_DIR}
     )
     message(STATUS "Fetching CLP from github.")

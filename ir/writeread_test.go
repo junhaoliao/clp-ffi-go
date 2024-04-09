@@ -16,13 +16,13 @@ func testWriteReadLogMessages(
 	ioWriter := openIoWriter(t, args)
 	irWriter := openIrWriter(t, args, ioWriter)
 
-	var events []ffi.LogEvent
+	var events []ffi.UnstructuredLogEvent
 	for _, msg := range messages {
-		event := ffi.LogEvent{
+		event := ffi.UnstructuredLogEvent{
 			LogMessage: msg,
 			Timestamp:  ffi.EpochTimeMs(time.Now().UnixMilli()),
 		}
-		_, err := irWriter.Write(event)
+		_, err := irWriter.WriteUnstructured(event)
 		if nil != err {
 			t.Fatalf("ir.Writer.Write failed: %v", err)
 		}

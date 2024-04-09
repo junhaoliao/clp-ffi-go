@@ -43,13 +43,13 @@ func testSerDerLogMessages(
 	}
 	irSerializer := serializeIrPreamble(t, args, preamble, ioWriter)
 
-	var events []ffi.LogEvent
+	var events []ffi.UnstructuredLogEvent
 	for _, msg := range logMessages {
-		event := ffi.LogEvent{
+		event := ffi.UnstructuredLogEvent{
 			LogMessage: msg,
 			Timestamp:  ffi.EpochTimeMs(time.Now().UnixMilli()),
 		}
-		irView, err := irSerializer.SerializeLogEvent(event)
+		irView, err := irSerializer.SerializeUnstructuredLogEvent(event)
 		if nil != err {
 			t.Fatalf("SerializeLogEvent failed: %v", err)
 		}

@@ -9,6 +9,7 @@ import "C"
 import (
 	"unsafe"
 
+	"github.com/vmihailenco/msgpack/v5"
 	"github.com/y-scope/clp-ffi-go/ffi"
 )
 
@@ -20,9 +21,15 @@ import (
 // object. Close must be called to free the underlying memory and failure to do
 // so will result in a memory leak.
 type Serializer interface {
-	SerializeLogEvent(event ffi.LogEvent) (BufView, error)
+	SerializeUnstructuredLogEvent(event ffi.UnstructuredLogEvent) (BufView, error)
+	SerializeStructuredLogEvent(event ffi.StructuredLogEvent) (BufView, error)
 	TimestampInfo() TimestampInfo
 	Close() error
+}
+
+type UnstructuredLogEventJson struct {
+	LogMessage string          `json:"message"`
+	Timestamp  ffi.EpochTimeMs `json:"timestamp"`
 }
 
 // EightByteSerializer creates and returns a new Serializer that writes eight
@@ -83,9 +90,9 @@ func FourByteSerializer(
 }
 
 // TODO: complete doc str.
-func KVSerializer() (Serializer, BufView, error) {
+func KeyValuePairSerializer() (Serializer, BufView, error) {
 	var irView C.ByteSpan
-	irs := kvSerializer{commonSerializer{TimestampInfo{"", "", ""}, nil}}
+	irs := keyValuePairSerializer{commonSerializer{TimestampInfo{"", "", ""}, nil}}
 	if err := IrError(C.ir_serializer_serialize_kv_preamble(&irs.cptr, &irView)); Success != err {
 		return nil, nil, err
 	}
@@ -111,14 +118,20 @@ type eightByteSerializer struct {
 	commonSerializer
 }
 
-// SerializeLogEvent attempts to serialize the log event, event, into a eight
-// byte encoded CLP IR byte stream. On error returns:
+// SerializeUnstructuredLogEvent attempts to serialize the log event, event,
+// into a eight byte encoded CLP IR byte stream. On error returns:
 //   - a nil BufView
 //   - [IrError] based on the failure of the Cgo call
-func (self *eightByteSerializer) SerializeLogEvent(
-	event ffi.LogEvent,
+func (self *eightByteSerializer) SerializeUnstructuredLogEvent(
+	event ffi.UnstructuredLogEvent,
 ) (BufView, error) {
-	return serializeLogEvent(self, event)
+	return serializeUnstructuredLogEvent(self, event)
+}
+
+func (self *eightByteSerializer) SerializeStructuredLogEvent(
+	event ffi.StructuredLogEvent,
+) (BufView, error) {
+	return serializeStructuredLogEvent(self, event)
 }
 
 // Close will delete the underlying C++ allocated memory used by the
@@ -140,14 +153,20 @@ type fourByteSerializer struct {
 	prevTimestamp ffi.EpochTimeMs
 }
 
-// SerializeLogEvent attempts to serialize the log event, event, into a four
-// byte encoded CLP IR byte stream. On error returns:
+// SerializeUnstructuredLogEvent attempts to serialize the log event, event,
+// into a four byte encoded CLP IR byte stream. On error returns:
 //   - nil BufView
 //   - [IrError] based on the failure of the Cgo call
-func (self *fourByteSerializer) SerializeLogEvent(
-	event ffi.LogEvent,
+func (self *fourByteSerializer) SerializeUnstructuredLogEvent(
+	event ffi.UnstructuredLogEvent,
 ) (BufView, error) {
-	return serializeLogEvent(self, event)
+	return serializeUnstructuredLogEvent(self, event)
+}
+
+func (self *fourByteSerializer) SerializeStructuredLogEvent(
+	event ffi.StructuredLogEvent,
+) (BufView, error) {
+	return serializeStructuredLogEvent(self, event)
 }
 
 // Close will delete the underlying C++ allocated memory used by the
@@ -161,19 +180,25 @@ func (self *fourByteSerializer) Close() error {
 }
 
 // TODO: add doc str.
-type kvSerializer struct {
+type keyValuePairSerializer struct {
 	commonSerializer
 }
 
 // TODO: add doc str.
-func (self *kvSerializer) SerializeLogEvent(
-	event ffi.LogEvent,
+func (self *keyValuePairSerializer) SerializeUnstructuredLogEvent(
+	event ffi.UnstructuredLogEvent,
 ) (BufView, error) {
-	return serializeLogEvent(self, event)
+	return serializeUnstructuredLogEvent(self, event)
+}
+
+func (self *keyValuePairSerializer) SerializeStructuredLogEvent(
+	event ffi.StructuredLogEvent,
+) (BufView, error) {
+	return serializeStructuredLogEvent(self, event)
 }
 
 // TODO: add doc str.
-func (self *kvSerializer) Close() error {
+func (self *keyValuePairSerializer) Close() error {
 	if nil != self.cptr {
 		C.ir_kv_serializer_close(self.cptr)
 		self.cptr = nil
@@ -181,9 +206,9 @@ func (self *kvSerializer) Close() error {
 	return nil
 }
 
-func serializeLogEvent(
+func serializeUnstructuredLogEvent(
 	serializer Serializer,
-	event ffi.LogEvent,
+	event ffi.UnstructuredLogEvent,
 ) (BufView, error) {
 	var irView C.ByteSpan
 	var err error
@@ -205,9 +230,39 @@ func serializeLogEvent(
 		if Success == err {
 			irs.prevTimestamp = event.Timestamp
 		}
-	case *kvSerializer:
+	case *keyValuePairSerializer:
+		structured_event := map[string]interface{}{
+			"timestamp": event.Timestamp,
+			"message":   event.LogMessage,
+		}
+		msgpackBytes, msgpackErr := msgpack.Marshal(structured_event)
+		if nil != msgpackErr {
+			return nil, msgpackErr
+		}
 		err = IrError(C.ir_serializer_serialize_kv_log_event(
-			newCByteSpan(event.BinaryRecord),
+			newCByteSpan(msgpackBytes),
+			irs.cptr,
+			&irView,
+		))
+	}
+	if Success != err {
+		return nil, err
+	}
+	return unsafe.Slice((*byte)(irView.m_data), irView.m_size), nil
+}
+
+func serializeStructuredLogEvent(
+	serializer Serializer,
+	event ffi.StructuredLogEvent,
+) (BufView, error) {
+	var irView C.ByteSpan
+	var err error
+	switch irs := serializer.(type) {
+	case *eightByteSerializer, *fourByteSerializer:
+		err = UnsupportedVersion
+	case *keyValuePairSerializer:
+		err = IrError(C.ir_serializer_serialize_kv_log_event(
+			newCByteSpan(event.MsgpackRecord),
 			irs.cptr,
 			&irView,
 		))

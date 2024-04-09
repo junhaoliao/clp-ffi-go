@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/klauspost/compress/zstd"
 	"github.com/vmihailenco/msgpack/v5"
 	"github.com/y-scope/clp-ffi-go/ffi"
 	"github.com/y-scope/clp-ffi-go/ir"
@@ -22,7 +23,7 @@ func test_structured(file_path string) {
 	}
 	defer file.Close()
 
-	outPath := file_path + ".clp"
+	outPath := file_path + ".clp.zst"
 	fmt.Println("Serialized IR to path: ", outPath)
 	outFile, err := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -30,7 +31,13 @@ func test_structured(file_path string) {
 		return
 	}
 	defer outFile.Close()
-	writer.WriteTo(outFile)
+	zstd_writer, err := zstd.NewWriter(outFile)
+	if nil != err {
+		fmt.Println("Failed to create a zstd writer.")
+		return
+	}
+	defer zstd_writer.Close()
+	writer.WriteTo(zstd_writer)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -62,7 +69,7 @@ func test_structured(file_path string) {
 			fmt.Println("0 bytes written: ", jsonLine)
 			return
 		}
-		writer.WriteTo(outFile)
+		writer.WriteTo(zstd_writer)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -70,7 +77,7 @@ func test_structured(file_path string) {
 		return
 	}
 
-	writer.CloseTo(outFile)
+	writer.CloseTo(zstd_writer)
 }
 
 func test_unstructured() {

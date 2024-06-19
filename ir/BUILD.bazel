@@ -3,15 +3,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "ir",
     srcs = [
-       "cgo_defs.go",
-       "decoder.go",
-       "deserializer.go",
-       "encoder.go",
-       "ir.go",
-       "irerror.go",
-       "irerror_string.go",
-       "reader.go",
-       "serializer.go",
+       "*.go",
     ],
     cgo = True,
     cdeps = [
@@ -34,9 +26,7 @@ alias(
 go_test(
     name = "ir_test",
     srcs = [
-        "ir_test.go",
-        "reader_test.go",
-        "serder_test.go",
+        "*.go",
     ],
     embed = [":ir"],
     deps = [

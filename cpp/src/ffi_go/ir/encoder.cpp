@@ -1,5 +1,6 @@
 #include "encoder.h"
 
+#include <iostream>
 #include <algorithm>
 #include <memory>
 #include <string>

@@ -1,5 +1,6 @@
 #include "serializer.h"
 
+#include <iostream>
 #include <cstdint>
 #include <memory>
 #include <string>

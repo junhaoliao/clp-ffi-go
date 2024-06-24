@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/junhaoliao/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ir"
 	"github.com/klauspost/compress/zstd"
 	"github.com/vmihailenco/msgpack/v5"
-	"github.com/junhaoliao/clp-ffi-go/ffi"
-	"github.com/y-scope/clp-ffi-go/ir"
 )
 
 func test_structured(file_path string) {
@@ -55,6 +55,7 @@ func test_structured(file_path string) {
 			fmt.Println("Error marshalling to MessagePack: ", err)
 			return
 		}
+		fmt.Println(msgPackBytes)
 		if 0 == len(msgPackBytes) {
 			fmt.Println("Encoded msgpack bytes empty: ", jsonLine)
 			return

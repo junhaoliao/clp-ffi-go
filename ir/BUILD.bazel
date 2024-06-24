@@ -23,7 +23,7 @@ go_library(
     deps = [
         "//ffi",
         "//search",
-        "@com_github_vmihailenco_msgpack//v5:go_default_library"
+        "@com_github_vmihailenco_msgpack_v5//:go_default_library"
     ],
 )
 

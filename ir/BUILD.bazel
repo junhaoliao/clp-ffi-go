@@ -1,13 +1,4 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
-load("@bazel_gazelle//:deps.bzl", "go_repository")
-
-go_repository(
-    name = "com_github_vmihailenco_msgpack",
-    importpath = "github.com/vmihailenco/msgpack/v5",
-    remote = "https://github.com/vmihailenco/msgpack.git",
-    tag = "v5.4.1",
-    visibility = ["//visibility:public"],
-)
 
 go_library(
     name = "ir",

@@ -1,4 +1,5 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test", "go_repository")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@bazel_gazelle//:deps.bzl", "go_repository")
 
 go_repository(
     name = "com_github_vmihailenco_msgpack",

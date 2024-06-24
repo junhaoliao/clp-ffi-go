@@ -8,7 +8,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 )
 
 // A Decoder takes objects encoded in CLP IR as input and returns them in their

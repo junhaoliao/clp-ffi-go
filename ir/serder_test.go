@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 )
 
 func TestPreamble(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 )
 
 // Writer builds up a buffer of serialized CLP IR using a [Serializer].

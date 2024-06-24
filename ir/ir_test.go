@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/klauspost/compress/zstd"
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 )
 
 const (

@@ -1,4 +1,4 @@
-clp-ffi-go
+/clp-ffi-go
 ==========
 .. image:: https://img.shields.io/badge/zulip-yscope--clp%20chat-1888FA?logo=zulip
    :alt: CLP on Zulip
@@ -24,7 +24,7 @@ a CLP IR byte stream.
     "time"
 
     "github.com/klauspost/compress/zstd"
-    "github.com/y-scope/clp-ffi-go/ffi"
+    "github.com/junhaoliao/clp-ffi-go/ffi"
     "github.com/y-scope/clp-ffi-go/ir"
   )
 

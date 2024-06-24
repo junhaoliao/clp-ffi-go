@@ -9,7 +9,7 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/vmihailenco/msgpack/v5"
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 	"github.com/y-scope/clp-ffi-go/ir"
 )
 

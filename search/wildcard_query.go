@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/y-scope/clp-ffi-go/ffi"
+	"github.com/junhaoliao/clp-ffi-go/ffi"
 )
 
 // A CLP wildcard query containing a query string and a bool for whether the

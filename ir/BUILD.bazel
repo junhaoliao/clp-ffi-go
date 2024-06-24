@@ -17,7 +17,7 @@ go_library(
     cdeps = [
         "//:libclp_ffi",
     ],
-    importpath = "github.com/y-scope/clp-ffi-go/ir",
+    importpath = "github.com/junhaoliao/clp-ffi-go/ir",
     visibility = ["//visibility:public"],
     deps = [
         "//ffi",

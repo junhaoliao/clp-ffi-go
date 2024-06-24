@@ -1,4 +1,4 @@
-module github.com/y-scope/clp-ffi-go
+module github.com/junhaoliao/clp-ffi-go
 
 go 1.20
 

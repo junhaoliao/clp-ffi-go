@@ -5,7 +5,7 @@ go_library(
     srcs = [
         "ffi.go",
     ],
-    importpath = "github.com/y-scope/clp-ffi-go/ffi",
+    importpath = "github.com/junhaoliao/clp-ffi-go/ffi",
     visibility = ["//visibility:public"],
 )
 

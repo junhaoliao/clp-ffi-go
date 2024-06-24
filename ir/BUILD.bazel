@@ -12,6 +12,7 @@ go_library(
        "irerror_string.go",
        "reader.go",
        "serializer.go",
+       "writer.go",
     ],
     cgo = True,
     cdeps = [

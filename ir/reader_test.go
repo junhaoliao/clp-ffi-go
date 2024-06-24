@@ -8,7 +8,7 @@ import (
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/junhaoliao/clp-ffi-go/ffi"
-	"github.com/y-scope/clp-ffi-go/search"
+	"github.com/junhaoliao/clp-ffi-go/search"
 )
 
 func TestIrReader(t *testing.T) {

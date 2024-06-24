@@ -13,7 +13,7 @@ import (
 	"unsafe"
 
 	"github.com/junhaoliao/clp-ffi-go/ffi"
-	"github.com/y-scope/clp-ffi-go/search"
+	"github.com/junhaoliao/clp-ffi-go/search"
 )
 
 // A Deserializer exports functions to deserialize log events from a CLP IR byte

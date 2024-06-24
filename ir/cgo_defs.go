@@ -9,7 +9,7 @@ import "C"
 import (
 	"unsafe"
 
-	"github.com/y-scope/clp-ffi-go/search"
+	"github.com/junhaoliao/clp-ffi-go/search"
 )
 
 // The follow functions are helpers to cleanup Cgo related code. The underlying

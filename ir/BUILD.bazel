@@ -1,4 +1,12 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test", "go_repository")
+
+go_repository(
+    name = "com_github_vmihailenco_msgpack",
+    importpath = "github.com/vmihailenco/msgpack/v5",
+    remote = "https://github.com/vmihailenco/msgpack.git",
+    tag = "v5.4.1",
+    visibility = ["//visibility:public"],
+)
 
 go_library(
     name = "ir",
@@ -23,6 +31,7 @@ go_library(
     deps = [
         "//ffi",
         "//search",
+        "@com_github_vmihailenco_msgpack//v5:go_default_library"
     ],
 )
 

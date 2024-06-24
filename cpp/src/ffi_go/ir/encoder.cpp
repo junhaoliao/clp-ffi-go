@@ -49,6 +49,7 @@ namespace {
                     dict_var_offsets
             ))
         {
+            std::cout << 1 << std::endl;
             return static_cast<int>(IRErrorCode_Corrupted_IR);
         }
 

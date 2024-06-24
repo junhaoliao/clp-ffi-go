@@ -57,6 +57,7 @@ namespace {
             static_assert(cAlwaysFalse<encoded_variable_t>, "Invalid/unhandled encoding type");
         }
         if (false == success) {
+            std::cout << 2 << std::endl;
             return static_cast<int>(IRErrorCode_Corrupted_IR);
         }
 
@@ -88,6 +89,7 @@ extern "C" auto ir_serializer_serialize_eight_byte_preamble(
                 serializer->m_ir_buf
         ))
     {
+        std::cout << 3 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
 
@@ -105,10 +107,12 @@ extern "C" auto ir_serializer_serialize_four_byte_preamble(
         ByteSpan* ir_view
 ) -> int {
     if (nullptr == ir_serializer_ptr || nullptr == ir_view) {
+        std::cout << 4 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
     Serializer* serializer{new Serializer{}};
     if (nullptr == serializer) {
+        std::cout << 5 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
     *ir_serializer_ptr = serializer;
@@ -121,6 +125,7 @@ extern "C" auto ir_serializer_serialize_four_byte_preamble(
                 serializer->m_ir_buf
         ))
     {
+        std::cout << 6 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
 
@@ -166,6 +171,7 @@ extern "C" auto ir_serializer_serialize_kv_preamble(
         ByteSpan* ir_view
 ) -> int {
     if (nullptr == ir_kv_serializer_ptr || nullptr == ir_view) {
+        std::cout << 7 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
     auto* kv_serializer{new KVSerializer{}};
@@ -182,6 +188,7 @@ extern "C" auto ir_serializer_serialize_kv_log_event(
         ByteSpan* ir_view
 ) -> int {
     if (nullptr == ir_kv_serializer || nullptr == ir_view) {
+        std::cout << 8 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
     auto* serializer{static_cast<KVSerializer*>(ir_kv_serializer)};
@@ -189,6 +196,7 @@ extern "C" auto ir_serializer_serialize_kv_log_event(
     msgpack::object_handle oh;
     msgpack::unpack(oh, static_cast<char const*>(msgpack_bytes.m_data), msgpack_bytes.m_size);
     if (false == serialize_key_value_pair_record(oh.get(), serializer->m_serialization_buffer)) {
+        std::cout << 9 << std::endl;
         return static_cast<int>(IRErrorCode_Corrupted_IR);
     }
     auto const buf_view{serializer->m_serialization_buffer.get_ir_buf()};

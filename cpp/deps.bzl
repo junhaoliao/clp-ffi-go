@@ -62,6 +62,7 @@ cc_library(
     includes = ["."],
     copts = [
         "-std=c++20",
+        "-mmacosx-version-min=10.15",
     ],
     deps = [
         "@clp_ext_com_github_nlohmann_json//:libjson",

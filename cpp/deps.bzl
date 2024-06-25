@@ -64,7 +64,6 @@ cc_library(
         "-std=c++20",
     ] + select({
         "@platforms//os:osx": [
-            "-mmacosx-version-min=10.15",
         ],
         "//conditions:default": [],
     }),
